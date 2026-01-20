@@ -219,7 +219,7 @@ pub fn generate_warnings(
     }
 
     // Check for missing scope when required
-    if config.rules.require_scope && files.len() > 0 {
+    if config.rules.require_scope && !files.is_empty() {
         // This is just a pre-warning; actual validation happens in rules
         let has_obvious_scope = packages.iter().any(|p| p.has_changes);
         if !has_obvious_scope {

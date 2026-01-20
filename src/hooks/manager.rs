@@ -37,7 +37,7 @@ impl HookManager {
 
     /// Install a specific hook.
     pub fn install_hook(&self, hook_name: &str, force: bool) -> Result<()> {
-        let template = HookTemplate::from_str(hook_name).ok_or_else(|| {
+        let template = hook_name.parse::<HookTemplate>().ok().ok_or_else(|| {
             CkError::Hook(HookError::NotFound {
                 hook: hook_name.to_string(),
             })
@@ -113,7 +113,7 @@ impl HookManager {
 
     /// Uninstall a specific hook.
     pub fn uninstall_hook(&self, hook_name: &str) -> Result<()> {
-        let template = HookTemplate::from_str(hook_name).ok_or_else(|| {
+        let template = hook_name.parse::<HookTemplate>().ok().ok_or_else(|| {
             CkError::Hook(HookError::NotFound {
                 hook: hook_name.to_string(),
             })
@@ -174,7 +174,7 @@ impl HookManager {
 
     /// Run a hook manually.
     pub fn run_hook(&self, hook_name: &str, args: &[String]) -> Result<()> {
-        let template = HookTemplate::from_str(hook_name).ok_or_else(|| {
+        let template = hook_name.parse::<HookTemplate>().ok().ok_or_else(|| {
             CkError::Hook(HookError::NotFound {
                 hook: hook_name.to_string(),
             })
@@ -224,7 +224,6 @@ impl HookManager {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_is_ck_hook_detection() {

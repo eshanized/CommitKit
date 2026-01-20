@@ -224,7 +224,7 @@ impl SmartCommit {
         }
 
         // Clamp to [0.0, 1.0]
-        f64::max(f64::min(score, 1.0), 0.0)
+        score.clamp(0.0, 1.0)
     }
 
     /// Run interactive smart commit flow.

@@ -42,7 +42,7 @@ impl CommitBuilder {
 
     /// Set the commit type from a string.
     pub fn with_type_str(mut self, type_str: &str) -> Result<Self> {
-        self.commit_type = CommitType::from_str(type_str);
+        self.commit_type = type_str.parse().ok();
         if self.commit_type.is_none() {
             return Err(CkError::Commit(CommitError::ParseFailed {
                 message: format!("Invalid commit type: {}", type_str),
@@ -301,7 +301,7 @@ impl CommitBuilder {
             .rules
             .allowed_types
             .iter()
-            .filter_map(|t| CommitType::from_str(t))
+            .filter_map(|t| t.parse().ok())
             .collect();
 
         let items: Vec<String> = types

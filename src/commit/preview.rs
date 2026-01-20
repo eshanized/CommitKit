@@ -107,10 +107,11 @@ impl<'a> CommitPreview<'a> {
         let padding_needed = box_width.saturating_sub(content_len + 2);
         format!("{}{}", " ".repeat(padding_needed), style("│").dim())
     }
+}
 
-    /// Get a formatted string representation.
-    pub fn to_string(&self) -> String {
-        self.message.format()
+impl<'a> std::fmt::Display for CommitPreview<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message.format())
     }
 }
 

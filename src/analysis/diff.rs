@@ -113,7 +113,7 @@ impl DiffAnalysis {
 }
 
 /// Categorize a file based on its path.
-fn categorize_file(path: &PathBuf) -> ChangeCategory {
+fn categorize_file(path: &std::path::Path) -> ChangeCategory {
     let path_str = path.to_string_lossy().to_lowercase();
     let extension = path.extension().and_then(|e| e.to_str()).unwrap_or("");
 
@@ -181,7 +181,10 @@ fn categorize_file(path: &PathBuf) -> ChangeCategory {
 }
 
 /// Extract a key change description from a file.
-fn extract_key_change(path: &PathBuf, change_type: crate::git::ChangeType) -> Option<String> {
+fn extract_key_change(
+    path: &std::path::Path,
+    change_type: crate::git::ChangeType,
+) -> Option<String> {
     let file_name = path.file_stem()?.to_string_lossy().to_string();
 
     let action = match change_type {
@@ -193,7 +196,7 @@ fn extract_key_change(path: &PathBuf, change_type: crate::git::ChangeType) -> Op
     };
 
     // Try to make it readable
-    let readable_name = file_name.replace('_', " ").replace('-', " ");
+    let readable_name = file_name.replace(['_', '-'], " ");
 
     Some(format!("{} {}", action, readable_name))
 }

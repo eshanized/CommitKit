@@ -47,7 +47,7 @@ clap = { version = "4", features = ["derive", "env", "wrap_help"] }
 # Terminal UI
 dialoguer = "0.11"
 console = "0.15"
-indicatif = "0.17"
+indicatif = "0.18"
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
@@ -74,7 +74,7 @@ git2 = "0.18"
 handlebars = "5"
 
 # WASM plugins
-wasmtime = "17"
+wasmtime = "40"
 
 # Logging
 tracing = "0.1"

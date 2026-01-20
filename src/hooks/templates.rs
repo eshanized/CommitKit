@@ -126,14 +126,17 @@ exit 0
 
         format!("{}{}", header, body)
     }
+}
 
-    /// Parse a hook name string.
-    pub fn from_str(s: &str) -> Option<Self> {
+impl std::str::FromStr for HookTemplate {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "commit-msg" => Some(HookTemplate::CommitMsg),
-            "prepare-commit-msg" => Some(HookTemplate::PrepareCommitMsg),
-            "pre-push" => Some(HookTemplate::PrePush),
-            _ => None,
+            "commit-msg" => Ok(HookTemplate::CommitMsg),
+            "prepare-commit-msg" => Ok(HookTemplate::PrepareCommitMsg),
+            "pre-push" => Ok(HookTemplate::PrePush),
+            _ => Err(()),
         }
     }
 }
@@ -164,9 +167,9 @@ mod tests {
     #[test]
     fn test_hook_from_str() {
         assert_eq!(
-            HookTemplate::from_str("commit-msg"),
-            Some(HookTemplate::CommitMsg)
+            "commit-msg".parse::<HookTemplate>(),
+            Ok(HookTemplate::CommitMsg)
         );
-        assert_eq!(HookTemplate::from_str("unknown"), None);
+        assert!("unknown".parse::<HookTemplate>().is_err());
     }
 }

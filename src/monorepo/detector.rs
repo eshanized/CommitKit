@@ -59,32 +59,31 @@ pub fn detect_packages(root: &Path, config: &CkConfig) -> Vec<PackageInfo> {
                     && name != "dist"
                     && name != "build"
             })
+            .flatten()
         {
-            if let Ok(entry) = entry {
-                if entry.file_name().to_string_lossy() == *marker {
-                    if let Some(parent) = entry.path().parent() {
-                        let parent_path = parent.to_path_buf();
+            if entry.file_name().to_string_lossy() == *marker {
+                if let Some(parent) = entry.path().parent() {
+                    let parent_path = parent.to_path_buf();
 
-                        // Skip if already seen or is the root
-                        if seen_paths.contains(&parent_path) || parent_path == root {
-                            continue;
-                        }
-
-                        // Extract package name
-                        let name = extract_package_name(entry.path());
-                        let scope = parent
-                            .file_name()
-                            .map(|s| s.to_string_lossy().to_string())
-                            .unwrap_or_else(|| name.clone());
-
-                        packages.push(PackageInfo {
-                            path: parent_path.clone(),
-                            name,
-                            scope,
-                            marker: marker.clone(),
-                        });
-                        seen_paths.insert(parent_path);
+                    // Skip if already seen or is the root
+                    if seen_paths.contains(&parent_path) || parent_path == root {
+                        continue;
                     }
+
+                    // Extract package name
+                    let name = extract_package_name(entry.path());
+                    let scope = parent
+                        .file_name()
+                        .map(|s| s.to_string_lossy().to_string())
+                        .unwrap_or_else(|| name.clone());
+
+                    packages.push(PackageInfo {
+                        path: parent_path.clone(),
+                        name,
+                        scope,
+                        marker: marker.clone(),
+                    });
+                    seen_paths.insert(parent_path);
                 }
             }
         }
@@ -129,7 +128,7 @@ fn extract_package_name(manifest_path: &Path) -> String {
                     if first_line.starts_with("module ") {
                         let module = first_line.trim_start_matches("module ").trim();
                         // Get last component of module path
-                        if let Some(name) = module.split('/').last() {
+                        if let Some(name) = module.split('/').next_back() {
                             return name.to_string();
                         }
                     }

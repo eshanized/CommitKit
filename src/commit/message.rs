@@ -86,7 +86,7 @@ impl CommitMessage {
         // Try to parse as conventional commit
         if let Some(captures) = CONVENTIONAL_REGEX.captures(message) {
             let type_str = captures.name("type").map(|m| m.as_str()).unwrap_or("");
-            let commit_type = CommitType::from_str(type_str).ok_or_else(|| {
+            let commit_type = type_str.parse::<CommitType>().ok().ok_or_else(|| {
                 CkError::Commit(CommitError::ParseFailed {
                     message: format!("Unknown commit type: {}", type_str),
                 })
@@ -145,13 +145,14 @@ impl CommitMessage {
                     };
 
                     // Check for breaking indicator
-                    let (type_str, is_breaking) = if type_str.ends_with('!') {
-                        (&type_str[..type_str.len() - 1], true)
+                    let (type_str, is_breaking) = if let Some(stripped) = type_str.strip_suffix('!')
+                    {
+                        (stripped, true)
                     } else {
                         (type_str, false)
                     };
 
-                    if let Some(commit_type) = CommitType::from_str(type_str) {
+                    if let Ok(commit_type) = type_str.parse::<CommitType>() {
                         // Extract body if present
                         let body = message
                             .lines()
