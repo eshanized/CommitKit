@@ -1,0 +1,85 @@
+# CK Configuration File
+# Author: Eshan Roy
+# SPDX-License-Identifier: MIT
+#
+# Copy this file to ck.toml and customize for your project.
+
+# Rule configuration
+[rules]
+max_subject_length = 72
+min_subject_length = 10
+require_scope = true
+require_body = false
+allowed_types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "revert", "build", "ci"]
+forbidden_types = ["wip"]
+
+# Scope configuration
+[rules.scope]
+require = true
+allowed = ["core", "cli", "config", "git", "rules", "hooks"]
+
+# Path-based rules (apply different rules to files matching patterns)
+[rules.paths]
+"src/core/**" = { type = "feat", require_scope = true, scope = "core" }
+"src/cli/**" = { type = "feat", scope = "cli" }
+"docs/**" = { type = "docs", require_body = false }
+"tests/**" = { type = "test" }
+
+# Branch-based rules
+[rules.branch]
+"main" = { forbid = ["wip", "fixup"], require_body = true }
+"release/*" = { forbid = ["wip"], require_signed = true }
+"feature/*" = { allow = ["wip"] }
+
+# CI-specific rules (stricter in CI)
+[rules.ci]
+strict = true
+fail_on_warning = true
+
+# Monorepo configuration
+[monorepo]
+enabled = true
+package_markers = ["Cargo.toml", "package.json", "go.mod"]
+root_scope = "root"
+
+# Explicit package definitions (optional)
+# [[monorepo.packages]]
+# path = "crates/core"
+# scope = "core"
+
+# Security configuration
+[security]
+enabled = true
+block_on_secret = true
+
+# Built-in secret patterns are always checked.
+# Add custom patterns here:
+# [[security.patterns]]
+# name = "Custom Token"
+# pattern = "MY_TOKEN_[A-Z0-9]{20}"
+
+# Hook configuration
+[hooks]
+enabled = true
+
+[hooks.commit_msg]
+enabled = true
+
+[hooks.prepare_commit_msg]
+enabled = false
+
+[hooks.pre_push]
+enabled = true
+
+# Plugin configuration
+[plugins]
+enabled = false
+directory = ".ck/plugins"
+enabled_plugins = []
+
+# UI configuration
+[ui]
+color = true
+emoji = true
+hints = true
+theme = "default"
