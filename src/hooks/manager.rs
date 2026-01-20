@@ -6,6 +6,7 @@
 use crate::error::{CkError, HookError, Result};
 use crate::git;
 use std::fs;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
@@ -90,23 +91,26 @@ impl HookManager {
             })
         })?;
 
-        // Make executable
-        let mut perms = fs::metadata(&hook_path)
-            .map_err(|e| {
+        // Make executable (Unix only)
+        #[cfg(unix)]
+        {
+            let mut perms = fs::metadata(&hook_path)
+                .map_err(|e| {
+                    CkError::Hook(HookError::InstallFailed {
+                        hook: template.filename().to_string(),
+                        message: format!("Failed to get permissions: {}", e),
+                    })
+                })?
+                .permissions();
+
+            perms.set_mode(0o755);
+            fs::set_permissions(&hook_path, perms).map_err(|e| {
                 CkError::Hook(HookError::InstallFailed {
                     hook: template.filename().to_string(),
-                    message: format!("Failed to get permissions: {}", e),
+                    message: format!("Failed to set permissions: {}", e),
                 })
-            })?
-            .permissions();
-
-        perms.set_mode(0o755);
-        fs::set_permissions(&hook_path, perms).map_err(|e| {
-            CkError::Hook(HookError::InstallFailed {
-                hook: template.filename().to_string(),
-                message: format!("Failed to set permissions: {}", e),
-            })
-        })?;
+            })?;
+        }
 
         Ok(())
     }
