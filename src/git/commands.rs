@@ -64,7 +64,10 @@ pub fn stage_files_in_repo(repo: &Repository, paths: &[&Path]) -> Result<()> {
                     // Try canonicalizing both paths to handle symlinks (common on macOS /var vs /private/var)
                     let canon_path = path.canonicalize().unwrap_or(path.to_path_buf());
                     let canon_workdir = workdir.canonicalize().unwrap_or(workdir.to_path_buf());
-                    canon_path.strip_prefix(&canon_workdir).unwrap_or(path).to_path_buf()
+                    canon_path
+                        .strip_prefix(&canon_workdir)
+                        .unwrap_or(path)
+                        .to_path_buf()
                 }
             }
         } else {
