@@ -13,6 +13,25 @@ keywords = ["git", "commit", "conventional-commits", "cli", "monorepo"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"
 
+[package.metadata.deb]
+maintainer = "Eshan Roy <eshanized@gmail.com>"
+copyright = "2024, Eshan Roy <eshanized@gmail.com>"
+license-file = ["LICENSE", "4"]
+depends = "$auto"
+section = "utils"
+priority = "optional"
+assets = [
+    ["target/release/ck", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/ck/README.md", "644"],
+]
+
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/ck", dest = "/usr/bin/ck", mode = "755" },
+    { source = "LICENSE", dest = "/usr/share/doc/ck/LICENSE", mode = "644" },
+    { source = "README.md", dest = "/usr/share/doc/ck/README.md", mode = "644" },
+]
+
 [[bin]]
 name = "ck"
 path = "src/main.rs"

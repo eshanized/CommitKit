@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build Linux Packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Install Packaging Tools
+        run: |
+          cargo install cargo-deb
+          cargo install cargo-generate-rpm
+          
+      - name: Build Release Binary
+        run: cargo build --release
+        
+      - name: Build Debian Package
+        run: cargo deb
+        
+      - name: Build RPM Package
+        run: cargo generate-rpm
+        
+      - name: Upload Debian Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ck-linux-deb
+          path: target/debian/*.deb
+          
+      - name: Upload RPM Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ck-linux-rpm
+          path: target/generate-rpm/*.rpm
+
+  build-windows:
+    name: Build Windows Binary
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Build Release Binary
+        run: cargo build --release
+        
+      - name: Upload Windows Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ck-windows-exe
+          path: target/release/ck.exe
+
+  build-macos:
+    name: Build macOS Binary
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Build Release Binary
+        run: cargo build --release
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg-content
+          cp target/release/ck dmg-content/
+          cp README.md dmg-content/
+          hdiutil create -volname "CommitKit" -srcfolder dmg-content -ov -format UDZO ck-macos.dmg
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: ck-macos-dmg
+          path: ck-macos.dmg
+
+  create-release:
+    name: Create Release
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        
+      - name: Display structure of downloaded files
+        run: ls -R
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ck-linux-deb/*.deb
+            ck-linux-rpm/*.rpm
+            ck-windows-exe/ck.exe
+            ck-macos-dmg/ck-macos.dmg
+          generate_release_notes: true
