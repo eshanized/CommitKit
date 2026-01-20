@@ -259,6 +259,13 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let repo = Git2Repo::init(dir.path()).unwrap();
 
+        // Configure user
+        {
+            let mut config = repo.config().unwrap();
+            config.set_str("user.name", "Test User").unwrap();
+            config.set_str("user.email", "test@example.com").unwrap();
+        }
+
         // Create initial commit
         {
             let sig = repo.signature().unwrap();

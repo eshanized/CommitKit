@@ -55,13 +55,23 @@ pub fn stage_files_in_repo(repo: &Repository, paths: &[&Path]) -> Result<()> {
 
     for path in paths {
         // Make path relative to workdir
+        // Make path relative to workdir
         let relative_path = if path.is_absolute() {
-            path.strip_prefix(repo.workdir()).unwrap_or(path)
+            let workdir = repo.workdir();
+            match path.strip_prefix(workdir) {
+                Ok(p) => p.to_path_buf(),
+                Err(_) => {
+                    // Try canonicalizing both paths to handle symlinks (common on macOS /var vs /private/var)
+                    let canon_path = path.canonicalize().unwrap_or(path.to_path_buf());
+                    let canon_workdir = workdir.canonicalize().unwrap_or(workdir.to_path_buf());
+                    canon_path.strip_prefix(&canon_workdir).unwrap_or(path).to_path_buf()
+                }
+            }
         } else {
-            path
+            path.to_path_buf()
         };
 
-        index.add_path(relative_path).map_err(|e| {
+        index.add_path(&relative_path).map_err(|e| {
             CkError::Git(GitError::CommandFailed {
                 command: format!("add {}", path.display()),
                 message: e.message().to_string(),
